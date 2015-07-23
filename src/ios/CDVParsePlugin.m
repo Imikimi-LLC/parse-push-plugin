@@ -13,55 +13,26 @@ options:
 */
 - (void)register: (CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
     NSDictionary *options   = [command.arguments objectAtIndex:0];
     NSString *appId         = [options objectForKey:@"appId"];
     NSString *clientKey     = [options objectForKey:@"clientKey"];
 
     [Parse setApplicationId:appId clientKey:clientKey];
 
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self registerForRemoteNotifications];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)getInstallationId:(CDVInvokedUrlCommand*) command
+- (void)registerForRemoteNotifications
 {
-    [self.commandDelegate runInBackground:^{
-        CDVPluginResult* pluginResult = nil;
-        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
-        NSString *installationId = currentInstallation.installationId;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:installationId];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    }];
-}
-
-- (void)getInstallationObjectId:(CDVInvokedUrlCommand*) command
-{
-    [self.commandDelegate runInBackground:^{
-        CDVPluginResult* pluginResult = nil;
-        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
-        NSString *objectId = currentInstallation.objectId;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:objectId];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    }];
-}
-
-- (void)getSubscriptions: (CDVInvokedUrlCommand *)command
-{
-    NSArray *channels = [PFInstallation currentInstallation].channels;
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:channels];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
-
-- (void)subscribe: (CDVInvokedUrlCommand *)command
-{
-    // Not sure if this is necessary
     if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
         UIUserNotificationSettings *settings =
-        [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert |
-                                                     UIUserNotificationTypeBadge |
-                                                     UIUserNotificationTypeSound
-                                          categories:nil];
+            [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert |
+                                                         UIUserNotificationTypeBadge |
+                                                         UIUserNotificationTypeSound
+                                              categories:nil];
         [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
         [[UIApplication sharedApplication] registerForRemoteNotifications];
     }
@@ -71,24 +42,57 @@ options:
             UIRemoteNotificationTypeAlert |
             UIRemoteNotificationTypeSound];
     }
+}
 
-    CDVPluginResult* pluginResult = nil;
+- (void)getInstallationId:(CDVInvokedUrlCommand*) command
+{
+    [self.commandDelegate runInBackground:^{
+        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+        NSString *installationId = currentInstallation.installationId;
+
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:installationId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+}
+
+- (void)getInstallationObjectId:(CDVInvokedUrlCommand*) command
+{
+    [self.commandDelegate runInBackground:^{
+        PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+        NSString *objectId = currentInstallation.objectId;
+
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:objectId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }];
+}
+
+- (void)getSubscriptions: (CDVInvokedUrlCommand *)command
+{
+    NSArray *channels = [PFInstallation currentInstallation].channels;
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:channels];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)subscribe: (CDVInvokedUrlCommand *)command
+{
     PFInstallation *currentInstallation = [PFInstallation currentInstallation];
     NSString *channel = [command.arguments objectAtIndex:0];
     [currentInstallation addUniqueObject:channel forKey:@"channels"];
     [currentInstallation saveInBackground];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)unsubscribe: (CDVInvokedUrlCommand *)command
 {
-    CDVPluginResult* pluginResult = nil;
     PFInstallation *currentInstallation = [PFInstallation currentInstallation];
     NSString *channel = [command.arguments objectAtIndex:0];
     [currentInstallation removeObject:channel forKey:@"channels"];
     [currentInstallation saveInBackground];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
