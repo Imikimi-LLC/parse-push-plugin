@@ -6,11 +6,17 @@
 
 @implementation CDVParsePlugin
 
-- (void)initialize: (CDVInvokedUrlCommand*)command
+/*
+options:
+    appId: "PARSE_APPID"
+    clientKey: "PARSE_CLIENT_KEY"
+*/
+- (void)register: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
-    NSString *appId = [command.arguments objectAtIndex:0];
-    NSString *clientKey = [command.arguments objectAtIndex:1];
+    NSDictionary *options   = [command.arguments objectAtIndex:0];
+    NSString *appId         = [options objectForKey:@"appId"];
+    NSString *clientKey     = [options objectForKey:@"clientKey"];
 
     [Parse setApplicationId:appId clientKey:clientKey];
 
