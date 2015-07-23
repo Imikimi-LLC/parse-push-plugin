@@ -26,35 +26,35 @@ var ParsePushPlugin = {
 				 this.trigger(base + ':' + pn[this._eventKey], pn);
 			 }
 		 }
-		 
+
 	 },
-	 
-    register: function(regParams, successCb, errorCb) {
-       var params = _.extend({ecb: serviceName + '._onNotify'}, regParams || {});
+
+  register: function(regParams, successCb, errorCb) {
+     var params = _.extend({ecb: serviceName + '._onNotify'}, regParams || {});
    	 this._eventKey = params.eventKey || null;
-   	 
-       cordova.exec(successCb, errorCb, serviceName, 'register', [params]);
-    },
 
-    getInstallationId: function(successCb, errorCb) {
-       cordova.exec(successCb, errorCb, serviceName, 'getInstallationId', []);
-    },
+     cordova.exec(successCb, errorCb, serviceName, 'register', [params]);
+  },
 
-    getInstallationObjectId: function(successCb, errorCb) {
-       cordova.exec(successCb, errorCb, serviceName, 'getInstallationObjectId', []);
-    },
+  getInstallationId: function(successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'getInstallationId', []);
+  },
 
-    getSubscriptions: function(successCb, errorCb) {
-       cordova.exec(successCb, errorCb, serviceName, 'getSubscriptions',[]);
-    },
+  getInstallationObjectId: function(successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'getInstallationObjectId', []);
+  },
 
-    subscribe: function(channel, successCb, errorCb) {
-       cordova.exec(successCb, errorCb, serviceName, 'subscribe', [ channel ]);
-    },
+  getSubscriptions: function(successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'getSubscriptions',[]);
+  },
 
-    unsubscribe: function(channel, successCb, errorCb) {
-       cordova.exec(successCb, errorCb, serviceName, 'unsubscribe', [ channel ]);
-    }
+  subscribe: function(channel, successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'subscribe', [ channel ]);
+  },
+
+  unsubscribe: function(channel, successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'unsubscribe', [ channel ]);
+  }
 };
 
 //
