@@ -3,12 +3,15 @@
 
 @interface CDVParsePlugin: CDVPlugin
 
+- (void)initialize: (CDVInvokedUrlCommand*)command;
 - (void)register: (CDVInvokedUrlCommand*)command;
 - (void)getInstallationId: (CDVInvokedUrlCommand*)command;
 - (void)getInstallationObjectId: (CDVInvokedUrlCommand*)command;
 - (void)getSubscriptions: (CDVInvokedUrlCommand *)command;
 - (void)subscribe: (CDVInvokedUrlCommand *)command;
 - (void)unsubscribe: (CDVInvokedUrlCommand *)command;
+
+- (void)setBadge: (CDVInvokedUrlCommand *)command;
 
 @end
 

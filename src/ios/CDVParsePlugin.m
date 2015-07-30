@@ -11,7 +11,7 @@ options:
     appId: "PARSE_APPID"
     clientKey: "PARSE_CLIENT_KEY"
 */
-- (void)register: (CDVInvokedUrlCommand*)command
+- (void)initialize: (CDVInvokedUrlCommand*)command
 {
     NSDictionary *options   = [command.arguments objectAtIndex:0];
     NSString *appId         = [options objectForKey:@"appId"];
@@ -19,14 +19,19 @@ options:
 
     [Parse setApplicationId:appId clientKey:clientKey];
 
-    [self registerForRemoteNotifications];
-
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void)registerForRemoteNotifications
+- (void)register: (CDVInvokedUrlCommand*)command
 {
+    NSDictionary *options   = [command.arguments objectAtIndex:0];
+    NSString *appId         = [options objectForKey:@"appId"];
+    NSString *clientKey     = [options objectForKey:@"clientKey"];
+
+    if (appId != nil && clientKey != nil)
+        [Parse setApplicationId:appId clientKey:clientKey];
+
     if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
         UIUserNotificationSettings *settings =
             [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert |
@@ -42,6 +47,9 @@ options:
             UIRemoteNotificationTypeAlert |
             UIRemoteNotificationTypeSound];
     }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getInstallationId:(CDVInvokedUrlCommand*) command
@@ -64,6 +72,17 @@ options:
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:objectId];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
+}
+
+- (void)setBadge: (CDVInvokedUrlCommand *)command
+{
+    NSNumber *badgeNumber = (NSNumber *)[arrayOfValues objectAtIndex:0];
+    PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+    currentInstallation[@"badge"] = badgeNumber
+    [currentInstallation saveInBackground];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getSubscriptions: (CDVInvokedUrlCommand *)command

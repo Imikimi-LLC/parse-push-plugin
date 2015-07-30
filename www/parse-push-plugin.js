@@ -29,6 +29,10 @@ var ParsePushPlugin = {
 
 	 },
 
+  // Initialize Parse and register device to receive push notifications
+  // IOS ONLY: if appId or clientKey is not set, Parse will not be initialized.
+  //   Use the "initialize" method prior to calling this function.
+  // ANDROID ONLY: Sets up notification javascript callbacks
   register: function(regParams, successCb, errorCb) {
      var params = _.extend({ecb: serviceName + '._onNotify'}, regParams || {});
    	 this._eventKey = params.eventKey || null;
@@ -54,6 +58,18 @@ var ParsePushPlugin = {
 
   unsubscribe: function(channel, successCb, errorCb) {
      cordova.exec(successCb, errorCb, serviceName, 'unsubscribe', [ channel ]);
+  }
+
+  // iOS only
+
+  // options: appId, clientKey
+  // Only initializes Parse. No further action is taken.
+  initialize: function(params, successCb, errorCb){
+     cordova.exec(successCb, errorCb, serviceName, 'initializeParse', [ params ]);
+  }
+
+  setBadge: function(badgeNumber, successCb, errorCb) {
+     cordova.exec(successCb, errorCb, serviceName, 'setBadge', [ badgeNumber ]);
   }
 };
 
