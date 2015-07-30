@@ -76,9 +76,9 @@ options:
 
 - (void)setBadge: (CDVInvokedUrlCommand *)command
 {
-    NSNumber *badgeNumber = (NSNumber *)[arrayOfValues objectAtIndex:0];
+    NSNumber *badgeNumber = (NSNumber *)[command.arguments objectAtIndex:0];
     PFInstallation *currentInstallation = [PFInstallation currentInstallation];
-    currentInstallation[@"badge"] = badgeNumber
+    currentInstallation[@"badge"] = badgeNumber;
     [currentInstallation saveInBackground];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
