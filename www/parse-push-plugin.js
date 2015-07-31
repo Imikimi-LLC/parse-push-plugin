@@ -1,8 +1,10 @@
 var serviceName = 'ParsePushPlugin';
 
 function extend(a, b) {
-  var k = null;
-  for (k in b) {a[k] = b[k];}
+  if (b) {
+    var k = null;
+    for (k in b) {a[k] = b[k];}
+  }
   return a;
 }
 
@@ -36,11 +38,14 @@ var ParsePushPlugin = {
   // IOS ONLY: if appId or clientKey is not set, Parse will not be initialized.
   //   Use the "initialize" method prior to calling this function.
   // ANDROID ONLY: Sets up notification javascript callbacks
-  register: function(regParams, successCb, errorCb) {
-    var params = extend({ecb: serviceName + '._onNotify'}, regParams || {});
-      this._eventKey = params.eventKey || null;
+  // params
+  //   appId      # parse appId
+  //   clientKey  # parse clientKey
+  register: function(params, successCb, errorCb) {
+    _params = extend({ecb: serviceName + '._onNotify'}, params);
+    this._eventKey = params.eventKey || null;
 
-    cordova.exec(successCb, errorCb, serviceName, 'register', [params]);
+    cordova.exec(successCb, errorCb, serviceName, 'register', [_params]);
   },
 
   getInstallationId: function(successCb, errorCb) {
@@ -67,6 +72,7 @@ var ParsePushPlugin = {
 
   // options: appId, clientKey
   // Only initializes Parse. No further action is taken.
+
   initialize: function(params, successCb, errorCb){
     cordova.exec(successCb, errorCb, serviceName, 'initializeParse', [ params ]);
   },
