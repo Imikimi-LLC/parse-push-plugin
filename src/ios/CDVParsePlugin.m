@@ -130,12 +130,13 @@ CDVParsePlugin *singleton_CDVParsePlugin = NULL;
 
 void MethodSwizzle(Class c, SEL originalSelector) {
   NSString *selectorString = NSStringFromSelector(originalSelector);
-  SEL newSelector = NSSelectorFromString([@"swizzled_" stringByAppendingString:selectorString]);
-  SEL noopSelector = NSSelectorFromString([@"noop_" stringByAppendingString:selectorString]);
+  SEL newSelector   = NSSelectorFromString([@"swizzled_" stringByAppendingString:selectorString]);
+  SEL noopSelector  = NSSelectorFromString([@"noop_" stringByAppendingString:selectorString]);
   Method originalMethod, newMethod, noop;
-  originalMethod = class_getInstanceMethod(c, originalSelector);
-  newMethod = class_getInstanceMethod(c, newSelector);
-  noop = class_getInstanceMethod(c, noopSelector);
+  originalMethod    = class_getInstanceMethod(c, originalSelector);
+  newMethod         = class_getInstanceMethod(c, newSelector);
+  noop              = class_getInstanceMethod(c, noopSelector);
+
   if (class_addMethod(c, originalSelector, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))) {
     class_replaceMethod(c, newSelector, method_getImplementation(originalMethod) ?: method_getImplementation(noop), method_getTypeEncoding(originalMethod));
   } else {
@@ -148,13 +149,11 @@ void MethodSwizzle(Class c, SEL originalSelector) {
   NSLog(@"CDVParsePlugin loading...");
   MethodSwizzle([self class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:));
   MethodSwizzle([self class], @selector(application:didReceiveRemoteNotification:));
+  MethodSwizzle([self class], @selector(application:didFailToRegisterForRemoteNotificationsWithError:));
   NSLog(@"CDVParsePlugin loaded");
 }
 
-- (void)noop_application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
-{
-}
-
+- (void)noop_application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken {}
 - (void)swizzled_application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken
 {
   // Call existing method
@@ -167,10 +166,7 @@ void MethodSwizzle(Class c, SEL originalSelector) {
   NSLog(@"CDVParsePlugin didRegisterForRemoteNotificationsWithDeviceToken done");
 }
 
-- (void)noop_application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
-{
-}
-
+- (void)noop_application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {}
 - (void)swizzled_application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
   // Call existing method
@@ -200,5 +196,12 @@ void MethodSwizzle(Class c, SEL originalSelector) {
 
   NSLog(@"CDVParsePlugin didReceiveRemoteNotification done");
 }
+
+
+- (void)noop_application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {}
+- (void)swizzled_application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+  NSLog(@"CDVParsePlugin didFailToRegisterForRemoteNotificationsWithError: %@", error);
+}
+
 
 @end
