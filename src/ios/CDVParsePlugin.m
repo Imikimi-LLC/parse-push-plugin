@@ -128,6 +128,44 @@ CDVParsePlugin *singleton_CDVParsePlugin = NULL;
 
 @implementation AppDelegate (CDVParsePlugin)
 
+/*
+ DisptachEvent invokes: document.dispatchEvent(new CustomEvent(enventType, {detail: details}))
+ intputs:
+ eventType
+ passed to the webView to define the event-type.
+ details
+ a valid, non-NULL json-compatible structure (NSArray, NSDictionary, etc...)
+ must be true: [NSJSONSerialization isValidJSONObject: details]
+ */
+void DispatchEvent(NSString *eventType, id details) {
+  if (![NSJSONSerialization isValidJSONObject: details]) {
+    NSLog(@"CDVParsePlugin DispatchEvent '%@': invalid 'details' value. Not NSJSONSerialization compatible.", eventType);
+    return;
+  }
+
+  if (!singleton_CDVParsePlugin) {
+    NSLog(@"CDVParsePlugin DispatchEvent '%@': internal error. Could not find CDVParsePlugin singleton.", eventType);
+    return;
+  }
+
+  NSError *error;
+  NSData *jsonData = [NSJSONSerialization dataWithJSONObject: details options: 0 error: &error];
+
+  if (!jsonData) {
+    NSLog(@"CDVParsePlugin DispatchEvent '%@': internal error converting 'details' to json: %@", eventType, error);
+    return;
+  }
+
+  NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+  // NSLog(@"CDVParsePlugin DispatchEvent '%@': ", eventType);
+  NSLog(@"CDVParsePlugin DispatchEvent '%@': jsonString: %@", eventType, jsonString);
+
+  NSString *javascript = [NSString stringWithFormat:@"document.dispatchEvent(new CustomEvent('%@', {detail:%@}));", eventType, jsonString];
+  NSLog(@"CDVParsePlugin DispatchEvent '%@': invoking javascript: %@", eventType, javascript);
+
+  [singleton_CDVParsePlugin.commandDelegate evalJs: javascript scheduledOnRunLoop: true];
+}
+
 void MethodSwizzle(Class c, SEL originalSelector) {
   NSString *selectorString = NSStringFromSelector(originalSelector);
   SEL newSelector   = NSSelectorFromString([@"swizzled_" stringByAppendingString:selectorString]);
@@ -172,28 +210,9 @@ void MethodSwizzle(Class c, SEL originalSelector) {
   // Call existing method
   NSLog(@"CDVParsePlugin didReceiveRemoteNotification 1");
   [self swizzled_application:application didReceiveRemoteNotification:userInfo];
-  [PFPush handlePush:userInfo];
+  // [PFPush handlePush:userInfo];
 
-  if (singleton_CDVParsePlugin) {
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfo
-                                                       options:0 //NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
-                                                         error:&error];
-    if (jsonData) {
-      NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-      NSLog(@"CDVParsePlugin didReceiveRemoteNotification: userInfo: %@", jsonString);
-      NSString *callback = @"console.log";
-      NSString *jsCallBack = [NSString stringWithFormat:@"%@(%@);", callback, jsonString];
-      NSLog(@"CDVParsePlugin didReceiveRemoteNotification: jsCallBack: %@", jsCallBack);
-
-      [singleton_CDVParsePlugin.webView stringByEvaluatingJavaScriptFromString:jsCallBack];
-    } else {
-      NSLog(@"Error converting Push data to json: %@", error);
-    }
-  } else {
-    NSLog(@"CDVParsePlugin didReceiveRemoteNotification singleton_CDVParsePlugin not set");
-  }
-
+  DispatchEvent(@"didReceiveRemoteNotification", userInfo);
   NSLog(@"CDVParsePlugin didReceiveRemoteNotification done");
 }
 
