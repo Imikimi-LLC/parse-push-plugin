@@ -7,6 +7,17 @@ Phonegap 3.x plugin for Parse.com push service.
 makes it fairly useless for PN in Phonegap/Cordova. This plugin bridges the gap by leveraging native Parse.com SDKs
 to register/receive PNs and allow a few essential methods to be accessible from Javascript.
 
+SBDD Notes
+----------
+
+Updated iOS to work with:
+
+* Cordova 5.1.1
+* Parse.com SDK for iOS v1.7.5
+* iOS 7 & 8
+
+I've had to tweak the Javascript API to make it make sense for iOS. I'm not sure how to make it compatible with Anroid yet, so I haven't sent a pull request to taivo.
+
 How Is This Fork Different?
 --------------------------
 
